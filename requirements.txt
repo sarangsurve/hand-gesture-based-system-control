@@ -1,8 +1,12 @@
 absl-py==1.0.0
 attrs==21.4.0
+comtypes==1.1.10
 cycler==0.11.0
+enum34==1.1.10
 fonttools==4.28.5
+future==0.18.2
 kiwisolver==1.3.2
+lxml==4.7.1
 matplotlib==3.5.1
 mediapipe==0.8.9.1
 numpy==1.22.0
@@ -11,6 +15,8 @@ opencv-python==4.5.5.62
 packaging==21.3
 Pillow==9.0.0
 protobuf==3.19.1
+psutil==5.9.0
+pycaw==20181226
 pyparsing==3.0.6
 python-dateutil==2.8.2
 six==1.16.0
