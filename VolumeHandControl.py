@@ -11,6 +11,11 @@ if platform.system() == 'Windows':
     from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 elif platform.system() == 'Linux':
     import subprocess
+elif platform.system() == 'Darwin':
+    pass
+    # Need to work on Darwin
+    # pip install appscript == 1.0.0
+    # from osax import *
 
 wCam, hCam = 640, 480
 
@@ -29,8 +34,10 @@ if platform.system() == 'Windows':
     volRange = volume.GetVolumeRange()
     minVolRange, maxVolRange = volRange[0], volRange[1]
     length = volRange[0]
-elif platform.system() == 'Linux':
+elif platform.system() == 'Linux' or platform.system() == 'Darwin':
     minVolRange, maxVolRange = 0, 100
+    # if platform.system() == 'Darwin':
+    #     sa = OSAX()
 else:
     print("Cannot access to Operating System's Volume Control.")
     exit()
@@ -55,6 +62,9 @@ while True:
         elif platform.system() == 'Linux':
             subprocess.call(["amixer", "-D", "pulse", "sset", "Master", str(vol) + "%"], stdout=subprocess.DEVNULL,
                             stderr=subprocess.STDOUT)
+        elif platform.system() == 'Darwin':
+            # sa.set_volume(i*2)
+            pass
 
         if length < 50:
             cv2.circle(img, (cx, cy), 15, (255, 0, 0), cv2.FILLED)
