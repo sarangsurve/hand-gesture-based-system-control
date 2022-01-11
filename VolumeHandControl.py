@@ -5,9 +5,12 @@ import HandTrackingModule as ht
 import math
 import platform
 
-from ctypes import cast, POINTER
-from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+if platform.system() == 'Windows':
+    from ctypes import cast, POINTER
+    from comtypes import CLSCTX_ALL
+    from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+elif platform.system() == 'Linux':
+    import subprocess
 
 wCam, hCam = 640, 480
 
@@ -19,12 +22,18 @@ length = 0
 volumePercent = 0
 detector = ht.handDetector(detectionCon=0.7)
 
-devices = AudioUtilities.GetSpeakers()
-interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-volume = cast(interface, POINTER(IAudioEndpointVolume))
-volRange = volume.GetVolumeRange()
-minVolRange, maxVolRange = volRange[0], volRange[1]
-length = volRange[0]
+if platform.system() == 'Windows':
+    devices = AudioUtilities.GetSpeakers()
+    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+    volume = cast(interface, POINTER(IAudioEndpointVolume))
+    volRange = volume.GetVolumeRange()
+    minVolRange, maxVolRange = volRange[0], volRange[1]
+    length = volRange[0]
+elif platform.system() == 'Linux':
+    minVolRange, maxVolRange = 0, 100
+else:
+    print("Cannot access to Operating System's Volume Control.")
+    exit()
 
 while True:
     success, img = cap.read()
@@ -41,8 +50,12 @@ while True:
         length = math.hypot(x2 - x1, y2 - y1)
         vol = np.interp(length, [40, 200], [minVolRange, maxVolRange])
         volumePercent = int(np.interp(vol, [0, 100], [minVolRange, maxVolRange]))
-        volume.SetMasterVolumeLevel(vol, None)
-        
+        if platform.system() == 'Windows':
+            volume.SetMasterVolumeLevel(vol, None)
+        elif platform.system() == 'Linux':
+            subprocess.call(["amixer", "-D", "pulse", "sset", "Master", str(vol) + "%"], stdout=subprocess.DEVNULL,
+                            stderr=subprocess.STDOUT)
+
         if length < 50:
             cv2.circle(img, (cx, cy), 15, (255, 0, 0), cv2.FILLED)
 
